@@ -142,9 +142,6 @@ async def main(bot: Client, message: Message):
         elif int(message.chat.id) in Config.BANNED_CHAT_IDS:
             await bot.leave_chat(message.chat.id)
             return
-        else:
-            pass
-
         try:
             forwarded_msg = await message.forward(Config.DB_CHANNEL)
             file_er_id = str(forwarded_msg.message_id)
@@ -163,17 +160,18 @@ async def main(bot: Client, message: Message):
             await asyncio.sleep(sl.x)
             await bot.send_message(
                 chat_id=int(Config.LOG_CHANNEL),
-                text=f"#FloodWait:\nGot FloodWait of `{str(sl.x)}s` from `{str(message.chat.id)}` !!",
+                text=f'#FloodWait:\nGot FloodWait of `{sl.x}s` from `{message.chat.id}` !!',
                 parse_mode="Markdown",
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
             )
+
         except Exception as err:
             await bot.leave_chat(message.chat.id)
             await bot.send_message(
                 chat_id=int(Config.LOG_CHANNEL),
-                text=f"#ERROR_TRACEBACK:\nGot Error from `{str(message.chat.id)}` !!\n\n**Traceback:** `{err}`",
+                text=f'#ERROR_TRACEBACK:\nGot Error from `{message.chat.id}` !!\n\n**Traceback:** `{err}`',
                 parse_mode="Markdown",
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
             )
 
 
@@ -197,13 +195,10 @@ async def ban(c: Client, m: Message):
     
     if len(m.command) == 1:
         await m.reply_text(
-            f"Use this command to ban any user from the bot.\n\n"
-            f"Usage:\n\n"
-            f"`/ban_user user_id ban_duration ban_reason`\n\n"
-            f"Eg: `/ban_user 1234567 28 You misused me.`\n"
-            f"This will ban user with id `1234567` for `28` days for the reason `You misused me`.",
-            quote=True
+            'Use this command to ban any user from the bot.\n\nUsage:\n\n`/ban_user user_id ban_duration ban_reason`\n\nEg: `/ban_user 1234567 28 You misused me.`\nThis will ban user with id `1234567` for `28` days for the reason `You misused me`.',
+            quote=True,
         )
+
         return
 
     try:
@@ -241,22 +236,17 @@ async def unban(c: Client, m: Message):
 
     if len(m.command) == 1:
         await m.reply_text(
-            f"Use this command to unban any user.\n\n"
-            f"Usage:\n\n`/unban_user user_id`\n\n"
-            f"Eg: `/unban_user 1234567`\n"
-            f"This will unban user with id `1234567`.",
-            quote=True
+            'Use this command to unban any user.\n\nUsage:\n\n`/unban_user user_id`\n\nEg: `/unban_user 1234567`\nThis will unban user with id `1234567`.',
+            quote=True,
         )
+
         return
 
     try:
         user_id = int(m.command[1])
         unban_log_text = f"Unbanning user {user_id}"
         try:
-            await c.send_message(
-                user_id,
-                f"Your ban was lifted!"
-            )
+            await c.send_message(user_id, 'Your ban was lifted!')
             unban_log_text += '\n\nUser notified successfully!'
         except:
             traceback.print_exc()
@@ -302,7 +292,7 @@ async def _banned_users(_, m: Message):
 
 @Bot.on_message(filters.private & filters.command("clear_batch"))
 async def clear_user_batch(bot: Client, m: Message):
-    MediaList[f"{str(m.from_user.id)}"] = []
+    MediaList[f'{m.from_user.id}'] = []
     await m.reply_text("Cleared your batch files successfully!")
 
 
@@ -430,7 +420,7 @@ async def button(bot: Client, cmd: CallbackQuery):
         if Config.UPDATES_CHANNEL is None:
             await cmd.answer("Sorry Sir, You didn't Set any Updates Channel!", show_alert=True)
             return
-        if not int(cmd.from_user.id) == Config.BOT_OWNER:
+        if int(cmd.from_user.id) != Config.BOT_OWNER:
             await cmd.answer("You are not allowed to do that!", show_alert=True)
             return
         try:
@@ -440,10 +430,10 @@ async def button(bot: Client, cmd: CallbackQuery):
             await cmd.answer(f"Can't Ban Him!\n\nError: {e}", show_alert=True)
 
     elif "addToBatchTrue" in cb_data:
-        if MediaList.get(f"{str(cmd.from_user.id)}", None) is None:
-            MediaList[f"{str(cmd.from_user.id)}"] = []
+        if MediaList.get(f'{cmd.from_user.id}', None) is None:
+            MediaList[f'{cmd.from_user.id}'] = []
         file_id = cmd.message.reply_to_message.message_id
-        MediaList[f"{str(cmd.from_user.id)}"].append(file_id)
+        MediaList[f'{cmd.from_user.id}'].append(file_id)
         await cmd.message.edit("File Saved in Batch!\n\n"
                                "Press below button to get batch link.",
                                reply_markup=InlineKeyboardMarkup([
@@ -455,13 +445,13 @@ async def button(bot: Client, cmd: CallbackQuery):
         await save_media_in_channel(bot, editable=cmd.message, message=cmd.message.reply_to_message)
 
     elif "getBatchLink" in cb_data:
-        message_ids = MediaList.get(f"{str(cmd.from_user.id)}", None)
+        message_ids = MediaList.get(f'{cmd.from_user.id}', None)
         if message_ids is None:
             await cmd.answer("Batch List Empty!", show_alert=True)
             return
         await cmd.message.edit("Please wait, generating batch link ...")
         await save_batch_media_in_channel(bot=bot, editable=cmd.message, message_ids=message_ids)
-        MediaList[f"{str(cmd.from_user.id)}"] = []
+        MediaList[f'{cmd.from_user.id}'] = []
 
     elif "closeMessage" in cb_data:
         await cmd.message.delete(True)
